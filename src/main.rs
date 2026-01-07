@@ -4,7 +4,7 @@ mod video;
 mod utils;
 
 use clap::Parser;
-use cli::{Cli, Commands, CharsetPreset};
+use cli::{Cli, Commands, CharsetPreset, resolve_dimensions};
 use pixel2ascii::{AsciiOptions, convert::CharsetPreset as LibCharsetPreset};
 
 
@@ -21,11 +21,13 @@ fn main() {
             charset_preset,
             invert,
             color,
-            no_audio: _no_audio,
+            no_audio,
             yt_dlp_path,
             ffmpeg_path,
         } => {
             
+            let (width, height) = resolve_dimensions(width, height);
+
             let lib_preset = match charset_preset {
                 CharsetPreset::Default => LibCharsetPreset::Default,
                 CharsetPreset::Dense => LibCharsetPreset::Dense,
@@ -46,7 +48,8 @@ fn main() {
                     charset_preset: lib_preset,
                     ..Default::default()
                 },
-                fps
+                fps,
+                !no_audio,
             );
 
         }

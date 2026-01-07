@@ -1,20 +1,24 @@
-use std::process::{ChildStdout, Command};
+use std::process::ChildStdout;
 use std::io::Read;
 use crate::video::{yt_dlp, ffmpeg};
 use pixel2ascii::{image_to_ascii, AsciiOptions};
-use std::time::{Instant, Duration};
 use crate::utils::{self, CursorGuard};
 
-pub fn run(youtube_url: &str, yt_dlp_path: &str, _ffmpeg_path: &str, width: u16, height: u16, options: AsciiOptions, fps: u8) {
+pub fn run(youtube_url: &str, yt_dlp_path: &str, ffmpeg_path: &str, width: u16, height: u16, options: AsciiOptions, fps: Option<u8>, audio_enabled: bool) {
     
     let _guard = CursorGuard::new();
 
-    // get the URL
-    let url = yt_dlp::get_video_url(youtube_url, yt_dlp_path).unwrap();
+    let actual_fps = match fps {
+        Some(f) => f as f32,
+        None => yt_dlp::get_video_fps(youtube_url, yt_dlp_path).unwrap_or(24.0),
+    };
+
+    // get the URL (with audio if enabled)
+    let url = yt_dlp::get_video_url(youtube_url, yt_dlp_path, audio_enabled).unwrap();
     
     // Spawn ffmpeg as a continuous video stream
 
-    let mut child = ffmpeg::spawn_ffmpeg(_ffmpeg_path, &url, width, height).unwrap();
+    let mut child = ffmpeg::spawn_ffmpeg(ffmpeg_path, &url, width, height, actual_fps, audio_enabled).unwrap();
 
     let mut stdout: ChildStdout = child.stdout.take().unwrap();
 
@@ -23,13 +27,8 @@ pub fn run(youtube_url: &str, yt_dlp_path: &str, _ffmpeg_path: &str, width: u16,
 
     let mut buffer = vec![0u8; frame_size];
 
-    let frame_duration = Duration::from_secs_f64(1.0 / fps as f64);
-
     loop {
-
-        let start = Instant::now();
-
-        // Read one frame
+        // Read one frame (blocks until ffmpeg outputs next frame)
         if stdout.read_exact(&mut buffer).is_err() {
             break;
         }
@@ -44,14 +43,5 @@ pub fn run(youtube_url: &str, yt_dlp_path: &str, _ffmpeg_path: &str, width: u16,
         utils::move_cursor_home();
 
         println!("{}", ascii_frame);
-
-        // FPS control
-        let elapsed = start.elapsed();
-
-        if elapsed < frame_duration {
-            std::thread::sleep(frame_duration - elapsed);
-        }
-
-        
     }
 }

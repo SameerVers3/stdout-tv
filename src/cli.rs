@@ -1,5 +1,9 @@
 use clap::{Parser, Subcommand, ValueEnum};
 
+/// Default aspect ratio (16:9)
+const ASPECT_WIDTH: f32 = 16.0;
+const ASPECT_HEIGHT: f32 = 9.0;
+
 #[derive(Parser)]
 #[command(name = "stdout-tv")]
 #[command(about = "Play YouTube videos as ASCII in your terminal", long_about = None)]
@@ -15,17 +19,17 @@ pub enum Commands {
         /// YouTube URL
         url: String,
 
-        /// Terminal width in characters
-        #[arg(long, default_value_t = 80)]
-        width: u16,
+        /// Terminal width in characters (height auto-calculated for 16:9 if not specified)
+        #[arg(long)]
+        width: Option<u16>,
 
-        /// Terminal height in characters
-        #[arg(long, default_value_t = 45)]
-        height: u16,
+        /// Terminal height in characters (width auto-calculated for 16:9 if not specified)
+        #[arg(long)]
+        height: Option<u16>,
 
-        /// Frames per second
-        #[arg(long, default_value_t = 24)]
-        fps: u8,
+        /// Frames per second (defaults to source video FPS)
+        #[arg(long)]
+        fps: Option<u8>,
 
         /// Custom charset (5-50 characters)
         #[arg(long, value_parser = validate_charset)]
@@ -40,7 +44,7 @@ pub enum Commands {
         invert: bool,
 
         /// Enable ANSI color
-        #[arg(long, default_value_t = false)]
+        #[arg(long, default_value_t = true)]
         color: bool,
 
         /// Disable audio playback
@@ -60,7 +64,7 @@ pub enum Commands {
     Info {
         /// YouTube URL
         url: String,
-        
+
         /// Custom yt-dlp executable path
         #[arg(long, default_value = "yt-dlp")]
         yt_dlp_path: String,
@@ -83,10 +87,31 @@ pub enum CharsetPreset {
 fn validate_charset(s: &str) -> Result<String, String> {
     let len = s.chars().count();
     if len < 5 {
-        Err(format!("charset must be at least 5 characters (got {})", len))
+        Err(format!(
+            "charset must be at least 5 characters (got {})",
+            len
+        ))
     } else if len > 50 {
-        Err(format!("charset must be at most 50 characters (got {})", len))
+        Err(format!(
+            "charset must be at most 50 characters (got {})",
+            len
+        ))
     } else {
         Ok(s.to_string())
+    }
+}
+
+/// Resolve width and height maintaining 16:9 aspect ratio
+pub fn resolve_dimensions(width: Option<u16>, height: Option<u16>) -> (u16, u16) {
+    if let (Some(w), Some(h)) = (width, height) {
+        (w, h)
+    } else if let Some(w) = width {
+        let h = ((w as f32) * ASPECT_HEIGHT / ASPECT_WIDTH).round() as u16;
+        (w, h)
+    } else if let Some(h) = height {
+        let w = ((h as f32) * ASPECT_WIDTH / ASPECT_HEIGHT).round() as u16;
+        (w, h)
+    } else {
+        (80, 45)
     }
 }

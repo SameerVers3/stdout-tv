@@ -1,26 +1,62 @@
 use std::process::{Child, Command, Stdio};
-use std::io;
 use image::RgbImage;
 
 
-pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16) -> Result<Child, Box<dyn std::error::Error>> {
+pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16, fps: f32, audio_enabled: bool) -> Result<Child, Box<dyn std::error::Error>> {
 
     let ffmpeg = if ffmpeg_path.is_empty() { "ffmpeg" } else { ffmpeg_path };
 
     // 3 bytes for rgb * height * width = number of bytes per frame
     let _frame_size = (width * height * 3) as usize;
 
-    
-    let child = Command::new(ffmpeg)
-        .args([
-            "-i", &video_url,
-            "-vf", &format!("scale={}:{}", width, height),
-            "-pix_fmt", "rgb24",
-            "-f", "rawvideo",
-            "-"
-        ])
-        .stdout(Stdio::piped())
-        .spawn()?;
+    let scale_filter = format!("scale={}:{}", width, height);
+    let fps_str = format!("{}", fps);
+
+    let child: Child;
+
+    if audio_enabled {
+
+        println!("Audio enabled.....");
+
+        // audio to PulseAudio
+        child = Command::new(ffmpeg)
+            .args([
+                "-fflags", "nobuffer", 
+                "-flags", "low_delay",
+                "-i", video_url,
+                "-map", "0:v",
+                "-r", &fps_str,
+                "-vf", &scale_filter,
+                "-pix_fmt", "rgb24",
+                "-f", "rawvideo",
+                "pipe:1",
+                // audio 
+                "-map", "0:a",
+                "-f", "pulse",
+                "-ac", "2",
+                "-ar", "44100",
+                "-buffer_size", "512",
+                "default",
+            ])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())  
+            .spawn()?;
+    } else {
+
+        // Video only
+        child = Command::new(ffmpeg)
+            .args([
+                "-i", video_url,
+                "-r", &fps_str,
+                "-vf", &scale_filter,
+                "-pix_fmt", "rgb24",
+                "-f", "rawvideo",
+                "-"
+            ])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()?;
+    };
 
     Ok(child)
 }
