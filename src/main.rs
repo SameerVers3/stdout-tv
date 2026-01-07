@@ -33,15 +33,15 @@ fn main() {
             // println!("yt-dlp path: {}", _yt_dlp_path);
             // println!("ffmpeg path: {}", _ffmpeg_path);
         }
-        Commands::Info { url: _url } => {
-            // TODO: Implement info command
-            // println!("Fetching info for: {}", _url);
+        Commands::Info { 
+            url: _url,
+            yt_dlp_path: _yt_dlp_path 
+        } => {
+            if let Err(e) = commands::info::run(&_url, &_yt_dlp_path) {
+                eprintln!("Error: {}", e);
+            }
         }
         Commands::Check => {
-            // TODO: Implement check command
-            // - Check if yt-dlp exists
-            // - Check if ffmpeg exists
-            // - Check if terminal supports ANSI
             commands::check::run();
         }
     }

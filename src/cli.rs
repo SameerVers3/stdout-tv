@@ -60,6 +60,10 @@ pub enum Commands {
     Info {
         /// YouTube URL
         url: String,
+        
+        /// Custom yt-dlp executable path
+        #[arg(long, default_value = "yt-dlp")]
+        yt_dlp_path: String,
     },
 
     /// Check if all dependencies are installed
