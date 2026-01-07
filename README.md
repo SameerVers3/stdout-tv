@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SameerVers3/stdout-tv/main/assets/logo.png" alt="stdout-tv logo" width="200"/>
+  <img src="https://github.com/user-attachments/assets/4d05ec2b-e0e5-4ac0-a674-b1e7d6fad80e" alt="stdout-tv logo" width="200"/>
 </p>
-
-<h1 align="center">📺 stdout-tv</h1>
 
 <p align="center">
   <strong>🎬 Transform YouTube into ASCII cinema - right in your terminal</strong>
