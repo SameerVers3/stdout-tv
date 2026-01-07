@@ -1,6 +1,6 @@
 use std::process::{Child, Command, Stdio};
 use image::RgbImage;
-
+use crate::utils;
 
 pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16, fps: f32, audio_enabled: bool) -> Result<Child, Box<dyn std::error::Error>> {
 
@@ -12,8 +12,8 @@ pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16,
     let child: Child;
 
     if audio_enabled {
+        let (audio_format, audio_device) = utils::get_audio_output();
 
-        // audio to PulseAudio
         child = Command::new(ffmpeg)
             .args([
                 "-fflags", "nobuffer", 
@@ -27,11 +27,10 @@ pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16,
                 "pipe:1",
                 // audio 
                 "-map", "0:a",
-                "-f", "pulse",
+                "-f", audio_format,
                 "-ac", "2",
                 "-ar", "44100",
-                "-buffer_size", "512",
-                "default",
+                audio_device,
             ])
             .stdout(Stdio::piped())
             .stderr(Stdio::null())  

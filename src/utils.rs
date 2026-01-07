@@ -14,6 +14,20 @@ pub fn move_cursor_home() {
     print!("\x1B[H"); 
 }
 
+pub fn get_audio_output() -> (&'static str, &'static str) {
+    #[cfg(target_os = "linux")]
+    { ("pulse", "default") }
+    
+    #[cfg(target_os = "macos")]
+    { ("audiotoolbox", "default") }
+    
+    #[cfg(target_os = "windows")]
+    { ("dsound", "default") }
+    
+    #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+    { ("sdl", "default") }
+}
+
 pub struct CursorGuard;
 
 impl CursorGuard {
@@ -29,3 +43,4 @@ impl Drop for CursorGuard {
         show_cursor();
     }
 }
+
