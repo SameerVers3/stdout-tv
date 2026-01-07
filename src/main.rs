@@ -1,15 +1,17 @@
 mod cli;
 mod commands;
+mod video;
 
 use clap::Parser;
 use cli::{Cli, Commands};
+use pixel2ascii::{AsciiOptions};
 
 fn main() {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Play {
-            url: _url,
+            url: video_url,
             width: _width,
             height: _height,
             fps: _fps,
@@ -21,17 +23,22 @@ fn main() {
             yt_dlp_path: _yt_dlp_path,
             ffmpeg_path: _ffmpeg_path,
         } => {
-            // TODO: Implement play command
-            // println!("Playing: {}", _url);
-            // println!("Resolution: {}x{}", _width, _height);
-            // println!("FPS: {}", _fps);
-            // println!("Charset: {:?}", _charset);
-            // println!("Charset Preset: {:?}", _charset_preset);
-            // println!("Invert: {}", _invert);
-            // println!("Color: {}", _color);
-            // println!("No Audio: {}", _no_audio);
-            // println!("yt-dlp path: {}", _yt_dlp_path);
-            // println!("ffmpeg path: {}", _ffmpeg_path);
+
+            commands::play::run(
+                &video_url,
+                &_yt_dlp_path, 
+                &_ffmpeg_path,
+                _width, 
+                _height, 
+                AsciiOptions {
+                    width: _width as u32,
+                    color: true,
+                    charset: _charset,
+                    ..Default::default()
+                },
+                _fps
+            );
+            
         }
         Commands::Info { 
             url: _url,
