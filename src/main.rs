@@ -20,7 +20,7 @@ fn main() {
             charset,
             charset_preset,
             invert,
-            color,
+            no_color,
             no_audio,
             yt_dlp_path,
             ffmpeg_path,
@@ -42,7 +42,7 @@ fn main() {
                 height, 
                 AsciiOptions {
                     width: width as u32,
-                    color,
+                    color: !no_color,
                     invert,
                     charset,
                     charset_preset: lib_preset,

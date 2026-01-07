@@ -6,7 +6,10 @@ const ASPECT_HEIGHT: f32 = 9.0;
 
 #[derive(Parser)]
 #[command(name = "stdout-tv")]
-#[command(about = "Play YouTube videos as ASCII in your terminal", long_about = None)]
+#[command(version)]
+#[command(about = "Play YouTube videos as ASCII in your terminal")]
+#[command(propagate_version = true)]
+#[command(arg_required_else_help = true)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -43,9 +46,9 @@ pub enum Commands {
         #[arg(long, default_value_t = false)]
         invert: bool,
 
-        /// Enable ANSI color
-        #[arg(long, default_value_t = true)]
-        color: bool,
+        /// Disable ANSI color
+        #[arg(long, default_value_t = false)]
+        no_color: bool,
 
         /// Disable audio playback
         #[arg(long, default_value_t = false)]
