@@ -51,13 +51,11 @@ stdout-tv play "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 <div align="center">
 
-  <!-- Top row: two images -->
   <img src="https://github.com/user-attachments/assets/a27f77e0-4e15-43c7-8668-3c8ba8b22cfa" alt="master_po" width="400" >
   <img src="https://github.com/user-attachments/assets/454e36f3-1336-4790-9831-34f7483864d7" alt="dense" width="400">
   
-  <br><br> <!-- space between rows -->
+  <br>
 
-  <!-- Bottom row: single image -->
   <img src="https://github.com/user-attachments/assets/dc7a2193-573e-40f4-b842-1b9196bdb697" alt="monochrome" width="450" style="margin:10px;">
 
 </div>
