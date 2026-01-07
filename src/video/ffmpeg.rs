@@ -6,17 +6,12 @@ pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16,
 
     let ffmpeg = if ffmpeg_path.is_empty() { "ffmpeg" } else { ffmpeg_path };
 
-    // 3 bytes for rgb * height * width = number of bytes per frame
-    let _frame_size = (width * height * 3) as usize;
-
     let scale_filter = format!("scale={}:{}", width, height);
     let fps_str = format!("{}", fps);
 
     let child: Child;
 
     if audio_enabled {
-
-        println!("Audio enabled.....");
 
         // audio to PulseAudio
         child = Command::new(ffmpeg)

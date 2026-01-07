@@ -1,11 +1,21 @@
 use std::process::ChildStdout;
 use std::io::Read;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use crate::video::{yt_dlp, ffmpeg};
 use pixel2ascii::{image_to_ascii, AsciiOptions};
 use crate::utils::{self, CursorGuard};
 
 pub fn run(youtube_url: &str, yt_dlp_path: &str, ffmpeg_path: &str, width: u16, height: u16, options: AsciiOptions, fps: Option<u8>, audio_enabled: bool) {
     
+    let running = Arc::new(AtomicBool::new(true));
+
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Failed to set Ctrl+C handler");
+
     let _guard = CursorGuard::new();
 
     let actual_fps = match fps {
@@ -14,20 +24,37 @@ pub fn run(youtube_url: &str, yt_dlp_path: &str, ffmpeg_path: &str, width: u16, 
     };
 
     // get the URL (with audio if enabled)
-    let url = yt_dlp::get_video_url(youtube_url, yt_dlp_path, audio_enabled).unwrap();
+    let url = match yt_dlp::get_video_url(youtube_url, yt_dlp_path, audio_enabled) {
+        Ok(u) => u,
+        Err(e) => {
+            eprintln!("Failed to get video URL: {}", e);
+            return;
+        }
+    };
     
     // Spawn ffmpeg as a continuous video stream
+    let mut child = match ffmpeg::spawn_ffmpeg(ffmpeg_path, &url, width, height, actual_fps, audio_enabled) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to spawn ffmpeg: {}", e);
+            return;
+        }
+    };
 
-    let mut child = ffmpeg::spawn_ffmpeg(ffmpeg_path, &url, width, height, actual_fps, audio_enabled).unwrap();
-
-    let mut stdout: ChildStdout = child.stdout.take().unwrap();
+    let mut stdout: ChildStdout = match child.stdout.take() {
+      Some(out) => out,
+      None => {
+            eprintln!("Failed to get the stdout");
+            return;
+      }
+    };
 
     // frame size
     let frame_size = (width * height * 3) as usize;
 
     let mut buffer = vec![0u8; frame_size];
 
-    loop {
+    while running.load(Ordering::SeqCst) {
         // Read one frame (blocks until ffmpeg outputs next frame)
         if stdout.read_exact(&mut buffer).is_err() {
             break;
