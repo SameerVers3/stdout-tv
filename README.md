@@ -42,7 +42,8 @@
 
 ##  Demo
 
-#video link
+https://github.com/user-attachments/assets/d132860c-de12-4f78-ab4a-c96425d2285a
+
 
 ```bash
 # One command. Instant ASCII cinema.
@@ -50,17 +51,18 @@
 stdout-tv play "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 ```
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/SameerVers3/stdout-tv/main/assets/dense.gif" width="600"/>
-</p>
+<div align="center">
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/SameerVers3/stdout-tv/main/assets/master_po.gif" width="600"/>
-</p>
+  <!-- Top row: two images -->
+  <img src="https://github.com/user-attachments/assets/a27f77e0-4e15-43c7-8668-3c8ba8b22cfa" alt="master_po" width="400" >
+  <img src="https://github.com/user-attachments/assets/454e36f3-1336-4790-9831-34f7483864d7" alt="dense" width="400">
+  
+  <br><br> <!-- space between rows -->
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/SameerVers3/stdout-tv/main/assets/monochrome.gif" width="600"/>
-</p>
+  <!-- Bottom row: single image -->
+  <img src="https://github.com/user-attachments/assets/dc7a2193-573e-40f4-b842-1b9196bdb697" alt="monochrome" width="450" style="margin:10px;">
+
+</div>
 
 ---
 
