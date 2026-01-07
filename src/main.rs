@@ -1,10 +1,12 @@
 mod cli;
 mod commands;
 mod video;
+mod utils;
 
 use clap::Parser;
-use cli::{Cli, Commands};
-use pixel2ascii::{AsciiOptions};
+use cli::{Cli, Commands, CharsetPreset};
+use pixel2ascii::{AsciiOptions, convert::CharsetPreset as LibCharsetPreset};
+
 
 fn main() {
     let cli = Cli::parse();
@@ -12,33 +14,41 @@ fn main() {
     match cli.command {
         Commands::Play {
             url: video_url,
-            width: _width,
-            height: _height,
-            fps: _fps,
-            charset: _charset,
-            charset_preset: _charset_preset,
-            invert: _invert,
-            color: _color,
+            width,
+            height,
+            fps,
+            charset,
+            charset_preset,
+            invert,
+            color,
             no_audio: _no_audio,
-            yt_dlp_path: _yt_dlp_path,
-            ffmpeg_path: _ffmpeg_path,
+            yt_dlp_path,
+            ffmpeg_path,
         } => {
+            
+            let lib_preset = match charset_preset {
+                CharsetPreset::Default => LibCharsetPreset::Default,
+                CharsetPreset::Dense => LibCharsetPreset::Dense,
+                CharsetPreset::Blocks => LibCharsetPreset::Blocks,
+            };
 
             commands::play::run(
                 &video_url,
-                &_yt_dlp_path, 
-                &_ffmpeg_path,
-                _width, 
-                _height, 
+                &yt_dlp_path, 
+                &ffmpeg_path,
+                width, 
+                height, 
                 AsciiOptions {
-                    width: _width as u32,
-                    color: true,
-                    charset: _charset,
+                    width: width as u32,
+                    color,
+                    invert,
+                    charset,
+                    charset_preset: lib_preset,
                     ..Default::default()
                 },
-                _fps
+                fps
             );
-            
+
         }
         Commands::Info { 
             url: _url,

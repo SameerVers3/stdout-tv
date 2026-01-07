@@ -11,7 +11,7 @@ pub fn spawn_ffmpeg(ffmpeg_path: &str, video_url: &str, width: u16, height: u16)
     let _frame_size = (width * height * 3) as usize;
 
     
-    let mut child = Command::new("ffmpeg")
+    let child = Command::new(ffmpeg)
         .args([
             "-i", &video_url,
             "-vf", &format!("scale={}:{}", width, height),
